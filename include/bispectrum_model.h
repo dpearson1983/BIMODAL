@@ -10,10 +10,7 @@
 #ifndef _BISPECTRUM_MODEL_H_
 #define _BISPECTRUM_MODEL_H_
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
+#include <vector>
 #include <cmath>
 #include <cuda.h>
 #include <vector_types.h>
@@ -215,14 +212,42 @@ __device__ double bispec_quad(int x, float &phi, float3 k) {
 // GPU kernel to calculate the bispectrum model. This kernel uses a fixed 32-point Gaussian quadrature
 // and utilizes constant and shared memory to speed things up by about 220x compared to the previous
 // version of the code while improving accuracy.
-__global__ void bispec_gauss_32(float3 *ks, double *Bk) {
+__global__ void bispec_mono_gauss_32(float3 *ks, double *Bk) {
     int tid = threadIdx.y + blockDim.x*threadIdx.x; // Block local thread ID
     
     __shared__ double int_grid[1024]; 
     
     // Calculate the value for this thread
     float phi = PI*d_xi[threadIdx.y] + PI;
-    int_grid[tid] = d_wi[threadIdx.x]*d_wi[threadIdx.y]*bispec_model(threadIdx.x, phi, ks[blockIdx.x]);
+    int_grid[tid] = d_wi[threadIdx.x]*d_wi[threadIdx.y]*bispec_mono(threadIdx.x, phi, ks[blockIdx.x]);
+    __syncthreads();
+    
+    // First step of reduction done by 32 threads
+    if (threadIdx.y == 0) {
+        for (int i = 1; i < 32; ++i)
+            int_grid[tid] += int_grid[tid + i];
+    }
+    __syncthreads();
+    
+    // Final reduction and writing result to global memory done only on first thread
+    if (tid == 0) {
+        for (int i = 1; i < 32; ++i)
+            int_grid[0] += int_grid[blockDim.x*i];
+        Bk[blockIdx.x] = int_grid[0]/4.0;
+    }
+}
+
+// GPU kernel to calculate the bispectrum model. This kernel uses a fixed 32-point Gaussian quadrature
+// and utilizes constant and shared memory to speed things up by about 220x compared to the previous
+// version of the code while improving accuracy.
+__global__ void bispec_quad_gauss_32(float3 *ks, double *Bk) {
+    int tid = threadIdx.y + blockDim.x*threadIdx.x; // Block local thread ID
+    
+    __shared__ double int_grid[1024]; 
+    
+    // Calculate the value for this thread
+    float phi = PI*d_xi[threadIdx.y] + PI;
+    int_grid[tid] = d_wi[threadIdx.x]*d_wi[threadIdx.y]*bispec_quad(threadIdx.x, phi, ks[blockIdx.x]);
     __syncthreads();
     
     // First step of reduction done by 32 threads
