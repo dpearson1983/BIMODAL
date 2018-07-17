@@ -1,0 +1,2 @@
+# BIMODAL
+BIspectrum MODel AcceLerated
