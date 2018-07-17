@@ -265,4 +265,28 @@ __global__ void bispec_quad_gauss_32(float3 *ks, double *Bk) {
     }
 }
 
+void model_calc(std::vector<double> &pars, float3 *d_ks, double *d_Bk, std::vector<double> &Bk_mono,
+                std::vector<double> &Bk_quad) {
+    std::vector<float> theta(pars.size());
+    for (int i = 0; i < pars.size(); ++i)
+        theta[i] = float(pars[i]);
+    gpuErrchk(cudaMemcpyToSymbol(d_p, theta.data(), pars.size()*sizeof(float)));
+    
+    dim3 num_threads(32,32);
+    
+    int num_data = Bk_mono.size();
+    
+    bispec_mono_gauss_32<<<num_data, num_threads>>>(d_ks, d_Bk);
+    gpuErrchk(cudaPeekAtLastError());
+    gpuErrchk(cudaDeviceSynchronize());
+    gpuErrchk(cudaMemcpy(Bk_mono.data(), d_Bk_mono, num_data*sizeof(double), cudaMemcpyDeviceToHost));
+    
+    num_data = Bk_quad.size();
+    
+    bispec_quad_gauss_32<<<num_data, num_threads>>>(d_ks, d_Bk);
+    gpuErrchk(cudaPeekAtLastError());
+    gpuErrchk(cudaDeviceSynchronize());
+    gpuErrchk(cudaMemcpy(Bk_mono.data(), d_Bk_mono, num_data*sizeof(double), cudaMemcpyDeviceToHost));
+}
+
 #endif
