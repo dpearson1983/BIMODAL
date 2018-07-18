@@ -6,7 +6,7 @@ CXXOPTS = -march=bdver4 -O3
 VXXFLAGS = -Xptxas="-v" -maxrregcount=64 --compiler-options "$(CXXFLAGS) $(CXXOPTS)"
 
 build: hide_harppi make_spline main.cu
-	$(VXX) $(VXXFLAGS) -O3 -o $(HOME)/bin/bkMCMC17 main.cu obj/make_spline.o obj/hide_harppi.o
+	$(VXX) $(VXXFLAGS) -O3 -o $(HOME)/bin/bimodal main.cu obj/make_spline.o obj/hide_harppi.o
 	
 hide_harppi: source/hide_harppi.cpp
 	mkdir -p obj
@@ -17,4 +17,4 @@ make_spline: source/make_spline.cpp
 	$(CXX) -lgsl -lgslcblas -lm $(CXXOPTS) -c -o obj/make_spline.o source/make_spline.cpp
 	
 clean:
-	rm obj/hide_harppi.o obj/make_spline.o ~/bin/bkMCMC17
+	rm obj/hide_harppi.o obj/make_spline.o ~/bin/bimodal

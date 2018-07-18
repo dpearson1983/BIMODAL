@@ -25,8 +25,8 @@
 __constant__ float4 d_Pk[128]; //   2048 bytes
 __constant__ float d_wi[32];   //    128 bytes
 __constant__ float d_xi[32];   //    128 bytes
-__constant__ float d_p[7];     //     20 bytes
-// Total constant memory:           2324 out of 65536 bytes
+__constant__ float d_p[6];     //     24 bytes
+// Total constant memory:           2328 out of 65536 bytes
 
 const float w_i[] = {0.096540088514728, 0.096540088514728, 0.095638720079275, 0.095638720079275,
                      0.093844399080805, 0.093844399080805, 0.091173878695764, 0.091173878695764,
@@ -279,14 +279,14 @@ void model_calc(std::vector<double> &pars, float3 *d_ks, double *d_Bk, std::vect
     bispec_mono_gauss_32<<<num_data, num_threads>>>(d_ks, d_Bk);
     gpuErrchk(cudaPeekAtLastError());
     gpuErrchk(cudaDeviceSynchronize());
-    gpuErrchk(cudaMemcpy(Bk_mono.data(), d_Bk_mono, num_data*sizeof(double), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(Bk_mono.data(), d_Bk, num_data*sizeof(double), cudaMemcpyDeviceToHost));
     
     num_data = Bk_quad.size();
     
     bispec_quad_gauss_32<<<num_data, num_threads>>>(d_ks, d_Bk);
     gpuErrchk(cudaPeekAtLastError());
     gpuErrchk(cudaDeviceSynchronize());
-    gpuErrchk(cudaMemcpy(Bk_mono.data(), d_Bk_mono, num_data*sizeof(double), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(Bk_quad.data(), d_Bk, num_data*sizeof(double), cudaMemcpyDeviceToHost));
 }
 
 #endif
