@@ -1,20 +1,20 @@
 CXX = cuda-g++
 ARCHS = sm_52
 VXX = nvcc -arch=$(ARCHS) -ccbin=cuda-g++
-CXXFLAGS = -lharppi -lgsl -lgslcblas -lm
+CXXFLAGS = -lgsl -lgslcblas -lm
 CXXOPTS = -march=bdver4 -O3
 VXXFLAGS = -Xptxas="-v" -maxrregcount=64 --compiler-options "$(CXXFLAGS) $(CXXOPTS)"
 
-build: hide_harppi make_spline main.cu
-	$(VXX) $(VXXFLAGS) -O3 -o $(HOME)/bin/bimodal main.cu obj/make_spline.o obj/hide_harppi.o
+build: harppi make_spline main.cu
+	$(VXX) $(VXXFLAGS) -O3 -o $(HOME)/bin/bimodal main.cu obj/make_spline.o obj/harppi.o
 	
-hide_harppi: source/hide_harppi.cpp
+harppi: source/harppi.cpp
 	mkdir -p obj
-	$(CXX) $(CXXFLAGS) $(CXXOPTS) -c -o obj/hide_harppi.o source/hide_harppi.cpp
+	$(CXX) $(CXXFLAGS) $(CXXOPTS) -c -o obj/harppi.o source/harppi.cpp
 	
 make_spline: source/make_spline.cpp
 	mkdir -p obj
 	$(CXX) -lgsl -lgslcblas -lm $(CXXOPTS) -c -o obj/make_spline.o source/make_spline.cpp
 	
 clean:
-	rm obj/hide_harppi.o obj/make_spline.o ~/bin/bimodal
+	rm obj/harppi.o obj/make_spline.o ~/bin/bimodal
