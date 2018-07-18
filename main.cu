@@ -1,4 +1,4 @@
-/* bkMCMC v17
+/* BIMODAL v1
  * David W. Pearson
  * September 28, 2017
  * 
