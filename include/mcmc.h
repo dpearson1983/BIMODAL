@@ -134,7 +134,7 @@ void bkmcmc::write_theta_screen() {
 }
 
 void bkmcmc::burn_in(int num_burn, float3 *ks, double *d_Bk) {
-    std::cout << "Buring the first " << num_burn << " trials to move to higher likelihood..." << std::endl;
+    std::cout << "Burning the first " << num_burn << " trials to move to higher likelihood..." << std::endl;
     double L, R;
     for (int i = 0; i < num_burn; ++i) {
         bool move = bkmcmc::trial(ks, d_Bk, L, R);
@@ -199,7 +199,7 @@ bkmcmc::bkmcmc(std::string data_file, std::string cov_file, std::vector<double> 
         while (!fin.eof()) {
             float3 kt;
             double B, var;
-            fin >> kt.x >> kt.y >> kt.z >> B >> var;
+            fin >> kt.x >> kt.y >> kt.z >> B;
             if (!fin.eof()) {
                 bkmcmc::k.push_back(kt);
                 bkmcmc::data.push_back(B);

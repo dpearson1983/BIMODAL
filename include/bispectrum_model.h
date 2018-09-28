@@ -120,13 +120,13 @@ __device__ double bispec_mono(int x, float &phi, float3 k) {
     float G23 = THREESEVENTHS + 0.5*mu23*(k2/k3 + k3/k2) + FOURSEVENTHS*mu23*mu23;
     float G31 = THREESEVENTHS + 0.5*mu31*(k3/k1 + k1/k3) + FOURSEVENTHS*mu31*mu31;
     
-    float Z2k12 = 0.5*d_p[1] + d_p[0]*(F12 + 0.5*mu12p*k12*(mu1/k1 + mu2/k2)) + d_p[2]*mu12p*mu12p*G12
+    float Z2k12 = 0.5*d_p[1] + d_p[0]*(F12 + 0.5*mu12p*k12*d_p[2]*(mu1/k1 + mu2/k2)) + d_p[2]*mu12p*mu12p*G12
                   + 0.5*d_p[2]*d_p[2]*mu12p*k12*mu1*mu2*(mu1/k1 + mu2/k2) 
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu12*mu12 - 1.0/3.0);
-    float Z2k23 = 0.5*d_p[1] + d_p[0]*(F23 + 0.5*mu23p*k23*(mu2/k2 + mu3/k3)) + d_p[2]*mu23p*mu23p*G23
+    float Z2k23 = 0.5*d_p[1] + d_p[0]*(F23 + 0.5*mu23p*k23*d_p[2]*(mu2/k2 + mu3/k3)) + d_p[2]*mu23p*mu23p*G23
                   + 0.5*d_p[2]*d_p[2]*mu23p*k23*mu2*mu3*(mu2/k2 + mu3/k3)
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu23*mu23 - 1.0/3.0);
-    float Z2k31 = 0.5*d_p[1] + d_p[0]*(F31 + 0.5*mu31p*k31*(mu3/k3 + mu1/k1)) + d_p[2]*mu31p*mu31p*G31
+    float Z2k31 = 0.5*d_p[1] + d_p[0]*(F31 + 0.5*mu31p*k31*d_p[2]*(mu3/k3 + mu1/k1)) + d_p[2]*mu31p*mu31p*G31
                   + 0.5*d_p[2]*d_p[2]*mu31p*k31*mu3*mu1*(mu3/k3 + mu1/k1)
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu31*mu31 - 1.0/3.0);
                   
@@ -137,7 +137,7 @@ __device__ double bispec_mono(int x, float &phi, float3 k) {
 }
 
 __device__ float legendre_quad(float mu) {
-    return 0.5*(3.0*mu*mu - 1.0);
+    return 2.5*(3.0*mu*mu - 1.0);
 }
 
 __device__ double bispec_quad(int x, float &phi, float3 k) {
@@ -147,7 +147,7 @@ __device__ double bispec_quad(int x, float &phi, float3 k) {
     float mu2 = -d_xi[x]*z + sqrtf(1.0 - d_xi[x]*d_xi[x])*sqrtf(1.0 - z*z)*cos(phi);
     float mu3 = -(mu1*k.x + mu2*k.y)/k.z;
     
-    float P_L = legendre_quad(mu1);
+//     float P_L = legendre_quad(mu1);
     
     // It's convenient to store these quantities to reduce the number of FLOP's needed later
     float sq_ratio = (d_p[4]*d_p[4])/(d_p[3]*d_p[3]) - 1.0;
@@ -167,6 +167,8 @@ __device__ double bispec_quad(int x, float &phi, float3 k) {
     mu1 = (mu1*d_p[4])/(d_p[3]*sqrt(mu1bar));
     mu2 = (mu2*d_p[4])/(d_p[3]*sqrt(mu2bar));
     mu3 = (mu3*d_p[4])/(d_p[3]*sqrt(mu3bar));
+    
+    float P_L = legendre_quad(mu1);
     
     // More convenient things to calculate before the long expressions
     float mu12 = -(k1*k1 + k2*k2 - k3*k3)/(2.0*k1*k2);
@@ -193,13 +195,13 @@ __device__ double bispec_quad(int x, float &phi, float3 k) {
     float G23 = THREESEVENTHS + 0.5*mu23*(k2/k3 + k3/k2) + FOURSEVENTHS*mu23*mu23;
     float G31 = THREESEVENTHS + 0.5*mu31*(k3/k1 + k1/k3) + FOURSEVENTHS*mu31*mu31;
     
-    float Z2k12 = 0.5*d_p[1] + d_p[0]*(F12 + 0.5*mu12p*k12*(mu1/k1 + mu2/k2)) + d_p[2]*mu12p*mu12p*G12
+    float Z2k12 = 0.5*d_p[1] + d_p[0]*(F12 + 0.5*mu12p*k12*d_p[2]*(mu1/k1 + mu2/k2)) + d_p[2]*mu12p*mu12p*G12
                   + 0.5*d_p[2]*d_p[2]*mu12p*k12*mu1*mu2*(mu1/k1 + mu2/k2) 
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu12*mu12 - 1.0/3.0);
-    float Z2k23 = 0.5*d_p[1] + d_p[0]*(F23 + 0.5*mu23p*k23*(mu2/k2 + mu3/k3)) + d_p[2]*mu23p*mu23p*G23
+    float Z2k23 = 0.5*d_p[1] + d_p[0]*(F23 + 0.5*mu23p*k23*d_p[2]*(mu2/k2 + mu3/k3)) + d_p[2]*mu23p*mu23p*G23
                   + 0.5*d_p[2]*d_p[2]*mu23p*k23*mu2*mu3*(mu2/k2 + mu3/k3)
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu23*mu23 - 1.0/3.0);
-    float Z2k31 = 0.5*d_p[1] + d_p[0]*(F31 + 0.5*mu31p*k31*(mu3/k3 + mu1/k1)) + d_p[2]*mu31p*mu31p*G31
+    float Z2k31 = 0.5*d_p[1] + d_p[0]*(F31 + 0.5*mu31p*k31*d_p[2]*(mu3/k3 + mu1/k1)) + d_p[2]*mu31p*mu31p*G31
                   + 0.5*d_p[2]*d_p[2]*mu31p*k31*mu3*mu1*(mu3/k3 + mu1/k1)
                   + 0.5*(-FOURSEVENTHS*(d_p[0] - 1.0))*(mu31*mu31 - 1.0/3.0);
                   
