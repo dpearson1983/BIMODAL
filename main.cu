@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
     
     // Declare a pointer for the integration workspace and allocate memory on the GPU
     double *d_Bk;
-    float3 *d_ks;
+    float4 *d_ks;
     
     gpuErrchk(cudaMalloc((void **)&d_Bk, p.geti("num_data")*sizeof(double)));
-    gpuErrchk(cudaMalloc((void **)&d_ks, p.geti("num_data")*sizeof(float3)));
+    gpuErrchk(cudaMalloc((void **)&d_ks, p.geti("num_data")*sizeof(float4)));
     
     std::vector<double> start_params;
     std::vector<bool> limit_params;
