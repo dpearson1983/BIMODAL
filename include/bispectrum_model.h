@@ -71,7 +71,7 @@ __device__ float legendre(int l, float mu) {
     if (l == 0) {
         return 1.0;
     } else {
-        return 2.5*(3.0*mu*mu - 1.0);
+        return 5.0*(3.0*mu*mu - 1.0);
     }
 }
 
