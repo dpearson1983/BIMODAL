@@ -71,7 +71,7 @@ __device__ float legendre(int l, float mu) {
     if (l == 0) {
         return 1.0;
     } else {
-        return 5.0*(3.0*mu*mu - 1.0);
+        return 0.5*(3.0*mu*mu - 1.0);
     }
 }
 
@@ -82,7 +82,7 @@ __device__ double bispec(int x, float &phi, float4 k) {
     float mu2 = -d_xi[x]*z + sqrtf(1.0 - d_xi[x]*d_xi[x])*sqrtf(1.0 - z*z)*cos(phi);
     float mu3 = -(mu1*k.x + mu2*k.y)/k.z;
     
-//     float P_L = legendre_quad(mu1);
+    float P_L = legendre(k.w, mu1);
     
     // It's convenient to store these quantities to reduce the number of FLOP's needed later
     float sq_ratio = (d_p[4]*d_p[4])/(d_p[3]*d_p[3]) - 1.0;
@@ -102,8 +102,6 @@ __device__ double bispec(int x, float &phi, float4 k) {
     mu1 = (mu1*d_p[4])/(d_p[3]*sqrt(mu1bar));
     mu2 = (mu2*d_p[4])/(d_p[3]*sqrt(mu2bar));
     mu3 = (mu3*d_p[4])/(d_p[3]*sqrt(mu3bar));
-    
-    float P_L = legendre(k.w, mu1);
     
     // More convenient things to calculate before the long expressions
     float mu12 = -(k1*k1 + k2*k2 - k3*k3)/(2.0*k1*k2);
@@ -170,7 +168,7 @@ __global__ void bispec_gauss_32(float4 *ks, double *Bk) {
     if (tid == 0) {
         for (int i = 1; i < 32; ++i)
             int_grid[0] += int_grid[blockDim.x*i];
-        Bk[blockIdx.x] = int_grid[0]/4.0;
+        Bk[blockIdx.x] = (int_grid[0]/4.0)*sqrtf((2.0*ks[blockIdx.x].w + 1.0)/PI);
     }
 }
 
